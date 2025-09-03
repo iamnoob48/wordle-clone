@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import wordList from "../wordle_words_full.json"
 import Line from './assets/components/Line.jsx';
+import confetti from 'canvas-confetti';
 function Wordle() {
 
     const [answer, setAnswer] = useState("hello");
@@ -30,12 +31,12 @@ function Wordle() {
             }
             
             if(e.key ==="Enter"){
-                const isValid = wordList.includes(currGuess.toUpperCase());
-                if(!isValid){
-                    setError("This word is not in word list");
-                    setPopup(true);
-                    return;
-                }
+                // const isValid = wordList.includes(currGuess.toUpperCase());
+                // if(!isValid){
+                //     setError("This word is not in word list");
+                //     setPopup(true);
+                //     return;
+                // }
                 if(currGuess.length !== 5){
     
                     return;
@@ -45,8 +46,17 @@ function Wordle() {
                 setGuess(newGuess);
                 setCurrGuess("");
                 if(currGuess === answer){ 
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: {
+                          y: 0.6
+                        }
+            
+                    })
     
                     setGameOver(true);
+                    return;
                 }
                     
     
@@ -78,7 +88,7 @@ function Wordle() {
         const fetchWords =  () =>{
 
             const word = wordList[Math.floor(Math.random() * wordList.length)];
-            setAnswer(word);
+            setAnswer(word.toLowerCase());
 
 
         }
@@ -90,12 +100,12 @@ function Wordle() {
     <div className='min-h-screen bg-gray-800 '>
         <h1 className="text-purple-800 text-center text-6xl py-3 font-extrabold">Wordle</h1>
         <div className='flex flex-col gap-1 text-white mt-10'>
-        {popup && (
+        {gameOver && (
             <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="bg-white p-6 rounded-xl shadow-xl text-center max-w-sm">
-              <p className="text-red-600 font-bold">{error}</p>
+              <p className="text-green-500 font-bold">You have won the game</p>
               <button 
-                onClick={() => setPopup(false)} 
+                onClick={() => setGameOver(false)} 
                 className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 OK
