@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import wordList from "../wordle_words_full.json"
-import Line from './assets/components/Line.jsx';
+import Line from './components/Line.jsx';
 import confetti from 'canvas-confetti';
 function Wordle() {
 
-    const [answer, setAnswer] = useState("hello");
+    const [answer, setAnswer] = useState("");
     const [guess,setGuess] = useState(Array(6).fill(null));
     const [currGuess, setCurrGuess] = useState("");
     const [gameOver, setGameOver] = useState(false);
+    const [notGuessed, setNotGuessed] = useState(false);
     const currRow = guess.findIndex(val=>val==null);
     const [error, setError] = useState("");
     const[popup, setPopup] = useState(false);
@@ -22,9 +23,7 @@ function Wordle() {
         const character = (e)=>{
             
 
-            if(gameOver) {
-                return;
-            }
+            
             if(e.key === "Backspace"){
                 setCurrGuess(prev=>prev.slice(0,-1));
                 return;
@@ -41,11 +40,18 @@ function Wordle() {
     
                     return;
                 }
+                const isSolution = currGuess === answer
+                
                 const newGuess = [...guess];
                 newGuess[currRow] = currGuess;
                 setGuess(newGuess);
                 setCurrGuess("");
-                if(currGuess === answer){ 
+                const allRowsFilled = newGuess.every(g => g && g.length === 5);
+                if(!isSolution && allRowsFilled){
+                    setNotGuessed(true);
+                    return;
+                }
+                if(isSolution){ 
                     confetti({
                         particleCount: 100,
                         spread: 70,
@@ -54,6 +60,7 @@ function Wordle() {
                         }
             
                     })
+                   
     
                     setGameOver(true);
                     return;
@@ -81,7 +88,7 @@ function Wordle() {
         return () => window.removeEventListener("keydown",character)
         
 
-    },[currGuess, guess, gameOver, answer])
+    },[currGuess, guess, gameOver, answer,notGuessed])
 
     useEffect(()=>{
 
@@ -106,6 +113,19 @@ function Wordle() {
               <p className="text-green-500 font-bold">You have won the game</p>
               <button 
                 onClick={() => setGameOver(false)} 
+                className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+        {notGuessed && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <div className="bg-white p-6 rounded-xl shadow-xl text-center max-w-sm">
+              <p className="text-red-500 font-bold">You lost the game the the word is :<span className='text-black text-lg font-extrabold'>{answer}</span></p>
+              <button 
+                onClick={() => setNotGuessed(false)} 
                 className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 OK
